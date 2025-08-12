@@ -1,0 +1,30 @@
+name: Process ICS File
+
+on:
+  push:
+    paths:
+      - raw.ics
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run ICS processor
+        run: |
+          python process_ics.py
+
+      - name: Commit and push processed file
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add processed.ics
+          git commit -m "Auto-update processed.ics" || echo "No changes"
+          git push
