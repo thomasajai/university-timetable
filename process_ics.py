@@ -10,9 +10,10 @@ def reorder_summary(summary):
 
 # Convert UTC datetime string to Eastern local time string
 def convert_to_eastern(utc_str):
-    utc_dt = datetime.strptime(utc_str, "%Y%m%dT%H%M%SZ").replace(tzinfo=ZoneInfo("UTC"))
-    eastern_dt = utc_dt.astimezone(ZoneInfo("America/New_York"))
-    return eastern_dt.strftime("%Y%m%dT%H%M%S")  # No 'Z'
+    # utc_dt = datetime.strptime(utc_str, "%Y%m%dT%H%M%SZ").replace(tzinfo=ZoneInfo("UTC"))
+    # eastern_dt = utc_dt.astimezone(ZoneInfo("America/New_York"))
+    # return eastern_dt.strftime("%Y%m%dT%H%M%S")  # No 'Z'
+    return utc_str
 
 # The timezone header to prepend
 VTIMEZONE_BLOCK = """BEGIN:VCALENDAR
