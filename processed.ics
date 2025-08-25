@@ -5,6 +5,7 @@ PRODID:adamgibbons/ics
 METHOD:PUBLISH
 X-PUBLISHED-TTL:PT1H
 X-WR-CALNAME:Fall 2025
+X-WR-CALNAME:Fall 2025
 BEGIN:VEVENT
 UID:Bi-mhlHya7LjPLxjUVVIE
 SUMMARY:Unsupervised Learning • Section 001 • COMS4774W (Waitlisted)
