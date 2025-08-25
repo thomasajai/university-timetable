@@ -10,12 +10,25 @@ def reorder_summary(summary: str) -> str:
         return summary
     return f"{parts[2]} • {parts[1]} • {parts[0]}"
 
+UTC_VTIMEZONE = """BEGIN:VTIMEZONE
+TZID:UTC
+X-LIC-LOCATION:UTC
+BEGIN:STANDARD
+TZOFFSETFROM:+0000
+TZOFFSETTO:+0000
+TZNAME:UTC
+DTSTART:19700101T000000
+END:STANDARD
+END:VTIMEZONE
+"""
+
 def process_ics_file(input_path: str, output_path: str):
     with open(input_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     new_lines = []
     inserted_calname = False
+    inserted_timezone = False
     i = 0
 
     while i < len(lines):
@@ -35,11 +48,16 @@ def process_ics_file(input_path: str, output_path: str):
             new_lines.append("X-WR-CALNAME:Fall 2025\n")
             inserted_calname = True
 
-        elif line.startswith("CALSCALE:") and not inserted_calname:
-            # Insert X-WR-CALNAME right after CALSCALE
+        elif line.startswith("CALSCALE:"):
+            # Insert after CALSCALE
             new_lines.append(line)
-            new_lines.append("X-WR-CALNAME:Fall 2025\n")
-            inserted_calname = True
+            if not inserted_calname:
+                new_lines.append("X-WR-CALNAME:Fall 2025\n")
+                inserted_calname = True
+            if not inserted_timezone:
+                new_lines.append("X-WR-TIMEZONE:UTC\n")
+                new_lines.append(UTC_VTIMEZONE + "\n")
+                inserted_timezone = True
             i += 1
             continue
 
