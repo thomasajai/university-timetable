@@ -1,10 +1,8 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 def reorder_summary(summary: str) -> str:
-    """
-    Example rule: split on '&bull;' and reorder.
-    Adjust this logic to fit your formatting needs.
-    """
     parts = [part.strip() for part in summary.split('&bull\\;')]
     if len(parts) != 3:
         return summary
@@ -29,6 +27,12 @@ RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
 END:STANDARD
 END:VTIMEZONE
 """
+
+def utc_to_et(utc_str: str) -> str:
+    """Convert UTC time string (YYYYMMDDTHHMMSSZ) → America/New_York wall time string"""
+    utc_dt = datetime.strptime(utc_str, "%Y%m%dT%H%M%SZ").replace(tzinfo=ZoneInfo("UTC"))
+    et_dt = utc_dt.astimezone(ZoneInfo("America/New_York"))
+    return et_dt.strftime("%Y%m%dT%H%M%S")
 
 def process_ics_file(input_path: str, output_path: str):
     with open(input_path, "r", encoding="utf-8") as f:
@@ -56,13 +60,10 @@ def process_ics_file(input_path: str, output_path: str):
             inserted_calname = True
 
         elif line.startswith("CALSCALE:"):
-            # Keep CALSCALE
             new_lines.append(line + "\n")
-            # Insert calname if missing
             if not inserted_calname:
                 new_lines.append("X-WR-CALNAME:Fall 2025\n")
                 inserted_calname = True
-            # Insert timezone block if missing
             if not inserted_timezone:
                 new_lines.append("X-WR-TIMEZONE:America/New_York\n")
                 new_lines.append(NY_VTIMEZONE + "\n")
@@ -70,14 +71,9 @@ def process_ics_file(input_path: str, output_path: str):
 
         elif line.startswith("DTSTART:") or line.startswith("DTEND:"):
             tag, value = line.split(":", 1)
-            if value.endswith("Z"):  # drop Z and add TZID
-                value = value[:-1]
+            if value.endswith("Z"):  # convert UTC → ET
+                value = utc_to_et(value)
             new_lines.append(f"{tag};TZID=America/New_York:{value}\n")
-
-        elif line.startswith("DTSTART;TZID") or line.startswith("DTEND;TZID"):
-            # Normalize to America/New_York if another TZID is present
-            prop, value = line.split(":", 1)
-            new_lines.append(f"{prop.split(';')[0]};TZID=America/New_York:{value}\n")
 
         else:
             new_lines.append(line + "\n")
